@@ -1,0 +1,29 @@
+{
+  "name": "howbigisanacre",
+  "version": "0.0.0",
+  "description": "single purpose website to get a handle on the size of an acre",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "keywords": [
+    "maps",
+    "leaflet",
+    "interactive",
+    "measure"
+  ],
+  "scripts": {
+    "start": "./run.sh"
+  },
+  "author": "Steve Klise",
+  "license": "MIT",
+  "readmeFilename": "readme.md",
+  "dependencies": {
+    "browserify":"",
+    "coffeeify":"",
+    "lodash":"",
+    "leaflet":"",
+    "leaflet-draw":""
+  }
+}
