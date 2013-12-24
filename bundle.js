@@ -1,51 +1,7 @@
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var draw_box, featureGroup, set_box, show_map;
-
 window.$ = require('./jquery');
 
 window.leaflet_draw = require('leaflet-draw');
-
-window.geocoder = L.mapbox.geocoder('sklise.giaje9f5');
-
-window.map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 20);
-
-show_map = function(err, data) {
-  map.fitBounds(data.lbounds);
-  map.locate();
-  return map.setZoom(18);
-};
-
-geocoder.query('New York, NY', show_map);
-
-featureGroup = L.featureGroup().addTo(map);
-
-map.on("locationfound", function(event) {
-  map.fitBounds(event.bounds);
-  map.setZoom(18);
-  return window.coords = set_box();
-});
-
-set_box = function() {
-  var bounds, padded;
-  bounds = map.getBounds();
-  padded = bounds.pad(-1.4);
-  return draw_box(padded);
-};
-
-draw_box = function(bounds) {
-  var center, corners, offcenter, polyline, straight_line;
-  corners = [bounds.getNorthWest(), bounds.getNorthEast(), bounds.getSouthEast(), bounds.getSouthWest(), bounds.getNorthWest()];
-  center = bounds.getCenter();
-  offcenter = bounds.getCenter();
-  center.lng = bounds.getCenter().lng + 0.003;
-  offcenter.lng = bounds.getCenter().lng - 0.003;
-  straight_line = [center, offcenter];
-  L.polyline(straight_line).addTo(featureGroup);
-  polyline = L.polyline(corners).addTo(featureGroup);
-  return map.on('draw:control', function(e) {
-    return featureGroup.addLayer(e.layer);
-  });
-};
 
 
 },{"./jquery":2,"leaflet-draw":3}],2:[function(require,module,exports){

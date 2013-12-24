@@ -1,46 +1,45 @@
-window.$ = require('./jquery');
-window.leaflet_draw = require('leaflet-draw')
 
 window.geocoder = L.mapbox.geocoder('sklise.giaje9f5')
 window.map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 20);
 
-show_map = (err, data) ->
+# Radius of earth in meters
+R = 6378100
+acre_m2 = 4046.86
+window.side_of_acre = Math.sqrt(acre_m2)
 
-  map.fitBounds(data.lbounds)
+to_rad = (deg) -> deg * Math.PI / 180
+to_deg = (rad) -> rad * 180 / Math.PI
 
-  map.locate()
+# Distance in meters
+window.straight_line =  (starting_coords, distance, bearing) ->
+  b = to_rad bearing
+  lat1 = to_rad starting_coords.lat
+  lng1 = to_rad starting_coords.lng
+  dist = distance/R
 
-  map.setZoom 18
+  lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) +
+          Math.cos(lat1)*Math.sin(dist)*Math.cos(b) )
 
-geocoder.query('New York, NY', show_map)
-featureGroup = L.featureGroup().addTo(map);
+  lng2 = lng1 + Math.atan2(Math.sin(b)*Math.sin(dist)*Math.cos(lat1),
+         Math.cos(dist)-Math.sin(lat1)*Math.sin(lat2));
 
-map.on "locationfound", (event) ->
-  map.fitBounds(event.bounds)
-  map.setZoom 18
-  window.coords = set_box()
+  lng2 = (lng2+3*Math.PI) % (2*Math.PI) - Math.PI;
 
-set_box = ->
-  bounds = map.getBounds()
-  padded = bounds.pad(-1.4)
-  draw_box(padded)
+  L.latLng to_deg(lat2), to_deg(lng2)
 
-draw_box = (bounds) ->
-  corners = [bounds.getNorthWest(),
-    bounds.getNorthEast(),
-    bounds.getSouthEast(),
-    bounds.getSouthWest(),
-    bounds.getNorthWest()
-  ]
+square_acre = (north_west) ->
+  north_east = straight_line(north_west, side_of_acre, 90)
+  south_west = straight_line(north_west, side_of_acre, 180)
+  south_east = L.latLng(south_west.lat, north_east.lng)
 
-  center = bounds.getCenter()
-  offcenter = bounds.getCenter()
-  center.lng = bounds.getCenter().lng+0.003
-  offcenter.lng = bounds.getCenter().lng-0.003
-  straight_line = [center, offcenter]
+  L.rectangle([
+    north_west,
+    south_east
+  ]).addTo(map)
 
-  L.polyline(straight_line).addTo(featureGroup)
-  polyline = L.polyline(corners).addTo(featureGroup)
 
-  map.on 'draw:control', (e) ->
-    featureGroup.addLayer(e.layer)
+# draw_box = (corners) ->
+  # L.rectangle(corners).addTo(map)
+
+map.setZoom 18
+window.coords = square_acre(map.getCenter())
