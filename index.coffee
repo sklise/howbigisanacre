@@ -1,6 +1,3 @@
-window.geocoder = L.mapbox.geocoder('sklise.giaje9f5')
-window.map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 20);
-
 # Radius of earth in meters
 R = 6378100
 acre_m2 = 4046.86
@@ -10,7 +7,11 @@ to_rad = (deg) -> deg * Math.PI / 180
 to_deg = (rad) -> rad * 180 / Math.PI
 draw_box = (layer, corners) -> L.rectangle(corners).addTo(layer)
 
-# Distance in meters
+# starting_coords - a latLng object of the starting point for the line
+# distance - numerical value of meters for the line
+# bearing - angle in degrees for compas bearing of straight line
+#
+# returns an array of latLng objects of the form [starting_point, ending_point]
 straight_line =  (starting_coords, distance, bearing) ->
   b = to_rad bearing
   lat1 = to_rad starting_coords.lat
@@ -25,23 +26,23 @@ straight_line =  (starting_coords, distance, bearing) ->
 
   lng2 = (lng2+3*Math.PI) % (2*Math.PI) - Math.PI;
 
-  L.latLng to_deg(lat2), to_deg(lng2)
+  [starting_coords, L.latLng to_deg(lat2), to_deg(lng2)]
 
 square_box = (center, side_length) ->
   half_diagonal = Math.sqrt(2 * (side_length/2) * (side_length/2))
-  north_west = straight_line(center, half_diagonal, 315)
-  south_east = straight_line(center, half_diagonal, 135)
+  north_west = straight_line(center, half_diagonal, 315)[1]
+  south_east = straight_line(center, half_diagonal, 135)[1]
 
   [north_west, south_east]
 
-map.setZoom 18
-
-fg = L.featureGroup().addTo(map)
-
-draw_acre = (map, layer, side_of_acre) ->
+draw_acre = (m, layer, side_of_acre) ->
   layer.clearLayers()
-  draw_box layer, square_box(map.getCenter(), side_of_acre)
+  draw_box layer, square_box(m.getCenter(), side_of_acre)
 
+# Setup
+geocoder = L.mapbox.geocoder('sklise.giaje9f5')
+map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 18);
+fg = L.featureGroup().addTo(map)
 draw_acre(map, fg, side_of_acre)
 map.on "move", -> draw_acre(map, fg, side_of_acre)
 map.on "zoom", -> draw_acre(map, fg, side_of_acre)
