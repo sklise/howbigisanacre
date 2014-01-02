@@ -13,14 +13,11 @@
     "interactive",
     "measure"
   ],
-  "scripts": {
-    "start": "./run.sh"
-  },
   "author": "Steve Klise",
   "license": "MIT",
   "readmeFilename": "readme.md",
   "dependencies": {
-    "browserify":"",
+    "watchify":"",
     "coffeeify":"",
     "lodash":"",
     "leaflet":"",

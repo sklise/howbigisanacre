@@ -1,3 +1,6 @@
+$ = require('./jquery')
+leaflet_draw = require('leaflet-draw')
+
 # Radius of earth in meters
 R = 6378100
 acre_m2 = 4046.86
@@ -5,7 +8,7 @@ window.side_of_acre = Math.sqrt(acre_m2)
 
 to_rad = (deg) -> deg * Math.PI / 180
 to_deg = (rad) -> rad * 180 / Math.PI
-draw_box = (layer, corners) -> L.rectangle(corners).addTo(layer)
+draw_box = (layer, corners) -> L.rectangle(corners, {color: "#138400", weight:4}).addTo(layer)
 
 # starting_coords - a latLng object of the starting point for the line
 # distance - numerical value of meters for the line
@@ -41,10 +44,14 @@ draw_acre = (m, layer, side_of_acre) ->
 
 # Setup
 geocoder = L.mapbox.geocoder('sklise.giaje9f5')
-map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 18);
+window.map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 18);
+
 fg = L.featureGroup().addTo(map)
 draw_acre(map, fg, side_of_acre)
 map.on "move", -> draw_acre(map, fg, side_of_acre)
-map.on "zoom", -> draw_acre(map, fg, side_of_acre)
+map.on "zoomend", -> draw_acre(map, fg, side_of_acre)
 map.on "resize", -> draw_acre(map, fg, side_of_acre)
 map.on "viewreset", -> draw_acre(map, fg, side_of_acre)
+$(document).ready ->
+  console.log 'hey man'
+  map.setZoom(24)
