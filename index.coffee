@@ -1,4 +1,3 @@
-
 window.geocoder = L.mapbox.geocoder('sklise.giaje9f5')
 window.map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 20);
 
@@ -9,9 +8,10 @@ window.side_of_acre = Math.sqrt(acre_m2)
 
 to_rad = (deg) -> deg * Math.PI / 180
 to_deg = (rad) -> rad * 180 / Math.PI
+draw_box = (layer, corners) -> L.rectangle(corners).addTo(layer)
 
 # Distance in meters
-window.straight_line =  (starting_coords, distance, bearing) ->
+straight_line =  (starting_coords, distance, bearing) ->
   b = to_rad bearing
   lat1 = to_rad starting_coords.lat
   lng1 = to_rad starting_coords.lng
@@ -27,19 +27,23 @@ window.straight_line =  (starting_coords, distance, bearing) ->
 
   L.latLng to_deg(lat2), to_deg(lng2)
 
-square_acre = (north_west) ->
-  north_east = straight_line(north_west, side_of_acre, 90)
-  south_west = straight_line(north_west, side_of_acre, 180)
-  south_east = L.latLng(south_west.lat, north_east.lng)
+square_box = (center, side_length) ->
+  half_diagonal = Math.sqrt(2 * (side_length/2) * (side_length/2))
+  north_west = straight_line(center, half_diagonal, 315)
+  south_east = straight_line(center, half_diagonal, 135)
 
-  L.rectangle([
-    north_west,
-    south_east
-  ]).addTo(map)
-
-
-# draw_box = (corners) ->
-  # L.rectangle(corners).addTo(map)
+  [north_west, south_east]
 
 map.setZoom 18
-window.coords = square_acre(map.getCenter())
+
+fg = L.featureGroup().addTo(map)
+
+draw_acre = (map, layer, side_of_acre) ->
+  layer.clearLayers()
+  draw_box layer, square_box(map.getCenter(), side_of_acre)
+
+draw_acre(map, fg, side_of_acre)
+map.on "move", -> draw_acre(map, fg, side_of_acre)
+map.on "zoom", -> draw_acre(map, fg, side_of_acre)
+map.on "resize", -> draw_acre(map, fg, side_of_acre)
+map.on "viewreset", -> draw_acre(map, fg, side_of_acre)
