@@ -4,7 +4,8 @@
   "description": "single purpose website to get a handle on the size of an acre",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "buildcss": "cat css/base.css css/buttons.css css/grids.css css/pure.css css/custom.css | cleancss -o styles.css"
   },
   "repository": "",
   "keywords": [
@@ -19,7 +20,7 @@
   "dependencies": {
     "watchify":"",
     "coffeeify":"",
-    "lodash":"",
+    "clean-css":"",
     "leaflet":"",
     "leaflet-draw":""
   }

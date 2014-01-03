@@ -1,4 +1,3 @@
-$ = require('./jquery')
 leaflet_draw = require('leaflet-draw')
 
 # Radius of earth in meters
@@ -44,7 +43,7 @@ draw_acre = (m, layer, side_of_acre) ->
 
 # Setup
 geocoder = L.mapbox.geocoder('sklise.giaje9f5')
-window.map = L.mapbox.map('map', 'sklise.giaje9f5').setView([40.7280, -73.9453], 18);
+window.map = L.mapbox.map('map', 'sklise.giaje9f5').addControl(L.mapbox.geocoderControl('sklise.giaje9f5')).setView([38.897683, -77.036560], 17);
 
 fg = L.featureGroup().addTo(map)
 draw_acre(map, fg, side_of_acre)
@@ -52,6 +51,17 @@ map.on "move", -> draw_acre(map, fg, side_of_acre)
 map.on "zoomend", -> draw_acre(map, fg, side_of_acre)
 map.on "resize", -> draw_acre(map, fg, side_of_acre)
 map.on "viewreset", -> draw_acre(map, fg, side_of_acre)
-$(document).ready ->
-  console.log 'hey man'
-  map.setZoom(24)
+
+locator = document.getElementById('locator')
+if !navigator.geolocation
+  locator.innerHTML = "This browser doesn't support geolocation"
+else
+  locator.onclick = (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    map.locate()
+
+map.on 'locationfound', (e) ->
+  map.fitBounds(e.bounds)
+map.on 'locationerror', (e) ->
+  locator.innerHTML = "There was an error finding your location."
